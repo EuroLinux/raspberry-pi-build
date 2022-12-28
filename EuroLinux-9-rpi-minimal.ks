@@ -49,8 +49,8 @@ nano
 #######################
 
 ## Add rpi repository
-[rpi-eurolinux-9]
 cat > /etc/yum.repos.d/rpi.repo <<EOF
+[rpi-eurolinux-9]
 name=Raspberry PI for EuroLinux 9
 baseurl=https://fbi.cdn.euro-linux.com/dist/eurolinux/server/9/aarch64/RPI/all/
 enabled=1
