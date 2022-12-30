@@ -5,6 +5,8 @@
 # Desc: RPI image build script
 # In this script I made stupid thing with `my_` as prefix for vars names ^.^'
 
+set -euo pipefail
+
 print_help(){
     echo "Usage $0 [minimal,gnome]"
     exit 1
