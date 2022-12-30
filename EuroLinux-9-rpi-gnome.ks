@@ -21,13 +21,14 @@ lang en_US.UTF-8
 clearpart --initlabel --all
 part /boot --asprimary --fstype=vfat --size=512 --label=boot
 part swap --asprimary --fstype=swap --size=256 --label=swap
-part / --asprimary --fstype=ext4 --size=7000 --label=rootfs
+part / --asprimary --fstype=ext4 --size=4400 --label=rootfs
 
 # Package setup
 %packages
 @core
 @gnome-desktop
 firefox
+bash-completion
 dejavu-sans-fonts
 dejavu-sans-mono-fonts
 dejavu-serif-fonts
