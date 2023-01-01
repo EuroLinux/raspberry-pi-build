@@ -95,6 +95,8 @@ echo "Done."
 df -h |grep $part
 EOF
 
+chmod 755 /usr/bin/rootfs-expand
+
 # MOTD
 cat << EOF > /etc/motd
 Welcome to EuroLinux for Raspberry Pi!
