@@ -59,7 +59,7 @@ gpgcheck=1
 gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-eurolinux9
 EOF
 ## rootfs-expand that allows to easily fix partition size
-cat > /usr/bin/rootfs-expand << EOF
+cat > /usr/sbin/rootfs-expand << EOF
 #!/bin/bash
 
 clear
@@ -92,7 +92,7 @@ echo "Done."
 df -h |grep $part
 EOF
 
-chmod 755 /usr/bin/rootfs-expand
+chmod 755 /usr/sbin/rootfs-expand
 
 # MOTD
 cat << EOF > /etc/motd
