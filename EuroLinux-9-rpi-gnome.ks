@@ -95,6 +95,18 @@ echo "Done."
 df -h |grep $part
 EOF
 
+# MOTD
+cat << EOF > /etc/motd
+Welcome to EuroLinux for Raspberry Pi!
+
+Any suggestions are welcome at https://github.com/EuroLinux/raspberry-pi-build
+
+Happy using.
+To delete this message use:
+echo '' > /etc/motd
+EOF
+
+
 # README
 cat >/root/README << EOF
 == EuroLinux 9 ==
@@ -102,20 +114,27 @@ If you want to resize your / partition, just type the following (as superuser):
 
 rootfs-expand
 
+Any suggestions are welcome at https://github.com/EuroLinux/raspberry-pi-build
 EOF
 
 
 cat > /boot/config.txt << EOF
 # This file is provided as a placeholder for user options
 # defaults for better graphic support
-[all]
 disable_overscan=1
 dtoverlay=vc4-kms-v3d
 camera_auto_detect=0
 gpu_mem=64
-
-#[pi4]
 #max_framebuffers=2
+
+
+# Uncomment to enable SPI
+#dtparam=spi=on
+# Uncomment to enable I2C
+#dtparam=i2c_arm=on
+# Overclocking - CHECK DOCS!!!!
+#over_voltage=8
+#arm_freq=2300
 EOF
 
 # Specific cmdline.txt files needed for raspberrypi2/3

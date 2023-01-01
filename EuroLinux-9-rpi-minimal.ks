@@ -92,10 +92,15 @@ echo "Done."
 df -h |grep $part
 EOF
 
-## bootconfig that currently is empty in the future we will fix that
-cat > /boot/config.txt << EOF
-# EuroLinux does not provide anything extra ATM
-#
+# MOTD
+cat << EOF > /etc/motd
+Welcome to EuroLinux for Raspberry Pi!
+
+Any suggestions are welcome at https://github.com/EuroLinux/raspberry-pi-build
+
+Happy using.
+To delete this message use:
+echo '' > /etc/motd
 EOF
 
 
@@ -105,6 +110,25 @@ cat >/root/README << EOF
 If you want to resize your / partition, just type the following (as superuser):
 
 rootfs-expand
+
+Any suggestions are welcome at https://github.com/EuroLinux/raspberry-pi-build
+EOF
+
+
+cat > /boot/config.txt << EOF
+#disable_overscan=1
+#dtoverlay=vc4-kms-v3d
+#camera_auto_detect=0
+#gpu_mem=64
+#max_framebuffers=2
+
+# Uncomment to enable SPI
+#dtparam=spi=on
+# Uncomment to enable I2C
+#dtparam=i2c_arm=on
+# Overclocking - CHECK DOCS!!!!
+#over_voltage=8
+#arm_freq=2300
 
 EOF
 
