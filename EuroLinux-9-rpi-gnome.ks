@@ -153,6 +153,7 @@ dnf clean all
 echo '%_install_langs C.utf8' > /etc/rpm/macros.image-language-conf
 echo 'LANG="C.utf8"' >  /etc/locale.conf
 rpm --rebuilddb
+
 # activate gui
 systemct set-default graphical.target
 
