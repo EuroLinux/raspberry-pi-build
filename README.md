@@ -2,9 +2,9 @@
 
 ## About Raspberry Pi for EuroLinux
 
-Ready to use images are here -> https://fbi.cdn.euro-linux.com/images/
+Ready-to-use images are here -> https://fbi.cdn.euro-linux.com/images/
 
-Raspberry Pi images have `rpi-TYPE` in the name. Currently we deliver two basic types:
+Raspberry Pi images have `rpi-TYPE` in the name. Currently, we deliver two basic types:
 
 1. minimal
 2. gnome
@@ -23,13 +23,13 @@ documentation](https://docs.euro-linux.com/jumpstarts/rpi/)
 ## Raspberry Pi 3
 
 The images are made for the **Raspberry Pi 4 model B**, they can work with the
-Raspberry Pi 3 and 3+, but Raspberry 3 hardware is below minimal requirements
+Raspberry Pi 3 and 3+, but Raspberry 3 hardware is below minimum requirements
 for the Enterprise Linux 9. We tested the console image and it worked, but
-gnome image was not stable (only 1GiB of RAM is not enough) on the Raspbery PI
+the Gnome image was not stable (only 1GiB of RAM is not enough) on the Raspberry Pi
 3+.
 
 ## How to build
-To build EuroLinux 9 RPI image use build script:
+To build EuroLinux 9 RPI image use the build script:
 
 Minimal image (console):
 
@@ -59,4 +59,4 @@ These images were based on the contributions and work made by the following peop
 - [Pablo Greco](https://github.com/psgreco) - his work on packing RPI kernel for Enterprise Linuxes
 - [Mark Verlinde](https://github.com/markVnl) - his work with `appliance-tools` that were great references
 - [Fabian Arrotin](https://github.com/arrfab) - his script resizing the partition
-- [AlmaLinux](https://github.com/AlmaLinux/raspberry-pi) - AlmaLinux kickstarts that were template for ours
+- [AlmaLinux](https://github.com/AlmaLinux/raspberry-pi) - AlmaLinux kickstarts that were a template for ours
