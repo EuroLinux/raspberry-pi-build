@@ -62,20 +62,20 @@ gpgcheck=1
 gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-eurolinux9
 EOF
 ## rootfs-expand that allows to easily fix partition size
-cat > /usr/bin/rootfs-expand << EOF
+cat > /usr/sbin/rootfs-expand << EOF
 #!/bin/bash
 
 clear
-part=$(mount |grep '^/dev.* / ' |awk '{print $1}')
-if [ -z "$part" ];then
+part=\$(mount |grep '^/dev.* / ' |awk '{print \$1}')
+if [ -z "\$part" ];then
     echo "Error detecting rootfs"
     exit -1
 fi
-dev=$(echo $part|sed 's/[0-9]*$//g')
-devlen=${#dev}
-num=${part:$devlen}
-if [[ "$dev" =~ ^/dev/mmcblk[0-9]*p$ ]];then
-    dev=${dev:0:-1}
+dev=\$(echo \$part|sed 's/[0-9]*\$//g')
+devlen=\${#dev}
+num=\${part:\$devlen}
+if [[ "\$dev" =~ ^/dev/mmcblk[0-9]*p\$ ]];then
+    dev=\${dev:0:-1}
 fi
 if [ ! -x /usr/bin/growpart ];then
     echo "Please install cloud-utils-growpart (sudo yum install cloud-utils-growpart)"
@@ -85,15 +85,29 @@ if [ ! -x /usr/sbin/resize2fs ];then
     echo "Please install e2fsprogs (sudo yum install e2fsprogs)"
     exit -3
 fi
-echo $part $dev $num
+echo \$part \$dev \$num
 
-echo "Extending partition $num to max size ...."
-growpart $dev $num
+echo "Extending partition \$num to max size ...."
+growpart \$dev \$num
 echo "Resizing ext4 filesystem ..."
-resize2fs $part
+resize2fs \$part
 echo "Done."
-df -h |grep $part
+df -h |grep \$part
 EOF
+
+chmod 755 /usr/sbin/rootfs-expand
+
+# MOTD
+cat << EOF > /etc/motd
+Welcome to EuroLinux for Raspberry Pi!
+
+Any suggestions are welcome at https://github.com/EuroLinux/raspberry-pi-build
+
+Happy using.
+To delete this message use:
+echo '' > /etc/motd
+EOF
+
 
 # README
 cat >/root/README << EOF
@@ -102,20 +116,27 @@ If you want to resize your / partition, just type the following (as superuser):
 
 rootfs-expand
 
+Any suggestions are welcome at https://github.com/EuroLinux/raspberry-pi-build
 EOF
 
 
 cat > /boot/config.txt << EOF
 # This file is provided as a placeholder for user options
 # defaults for better graphic support
-[all]
 disable_overscan=1
 dtoverlay=vc4-kms-v3d
 camera_auto_detect=0
 gpu_mem=64
-
-#[pi4]
 #max_framebuffers=2
+
+
+# Uncomment to enable SPI
+#dtparam=spi=on
+# Uncomment to enable I2C
+#dtparam=i2c_arm=on
+# Overclocking - CHECK DOCS!!!!
+#over_voltage=8
+#arm_freq=2300
 EOF
 
 # Specific cmdline.txt files needed for raspberrypi2/3
@@ -132,6 +153,7 @@ dnf clean all
 echo '%_install_langs C.utf8' > /etc/rpm/macros.image-language-conf
 echo 'LANG="C.utf8"' >  /etc/locale.conf
 rpm --rebuilddb
+
 # activate gui
 systemct set-default graphical.target
 
