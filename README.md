@@ -1,15 +1,37 @@
-# EuroLinux Raspberry PI Image repository
+# EuroLinux Raspberry Pi Images repository
 
-EuroLinux Raspberry PI official repository.
+## About Raspberry Pi for EuroLinux
 
-## WORK IN PROGRESS
+Ready to use images are here -> https://fbi.cdn.euro-linux.com/images/
 
-This repository contains work in progress, once we polish it we will release official rpi images with EuroLinux 9.
+Raspberry Pi images have `rpi-TYPE` in the name. Currently we deliver two basic types:
+
+1. minimal
+2. gnome
+
+Both have the following basic authentication enabled:
+
+user: `root`
+password: `raspberry`
+
+**NOTE:** Enterprise Linuxes 9 forward have **SSH root login with password
+disabled by default**.
+
+More documentation is available here [EuroLinux for Raspberry PI jumpstart
+documentation](https://docs.euro-linux.com/jumpstarts/rpi/)
+
+## Raspberry Pi 3
+
+The images are made for the **Raspberry Pi 4 model B**, they can work with the
+Raspberry Pi 3 and 3+, but Raspberry 3 hardware is below minimal requirements
+for the Enterprise Linux 9. We tested the console image and it worked, but
+gnome image was not stable (only 1GiB of RAM is not enough) on the Raspbery PI
+3+.
 
 ## How to build
 To build EuroLinux 9 RPI image use build script:
 
-Minimal image (console)
+Minimal image (console):
 
 ```bash
 build-image.sh minimal
@@ -21,7 +43,7 @@ Image with the Gnome:
 build-image.sh gnome
 ```
 
-## About compression
+### About compression
 We tested the following compressions
 
 | Command | Size | Time |
