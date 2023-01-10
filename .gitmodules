@@ -1,0 +1,3 @@
+[submodule "packages/raspberrypi-userland/userland "]
+	path = packages/raspberrypi-userland/userland 
+	url = https://github.com/raspberrypi/userland.git

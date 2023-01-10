@@ -1,0 +1,432 @@
+diff -up ./CMakeLists.txt.orig ./CMakeLists.txt
+--- ./CMakeLists.txt.orig	2022-06-16 15:32:08.000000000 +0200
++++ ./CMakeLists.txt	2022-10-12 17:57:35.435890165 +0200
+@@ -8,6 +8,8 @@ SET(PROJECT_VER_PATCH 0)
+ SET(PROJECT_VER "${PROJECT_VER_MAJOR}.${PROJECT_VER_MINOR}.${PROJECT_VER_PATCH}")
+ SET(PROJECT_APIVER "${PROJECT_VER}")
+ 
++include(GNUInstallDirs)
++
+ if(ARM64)
+    set(BUILD_MMAL FALSE)
+    set(BUILD_MMAL_APPS FALSE)
+@@ -125,7 +127,7 @@ if(PKG_CONFIG_FOUND)
+ 	foreach(PCFILE bcm_host.pc brcmegl.pc brcmglesv2.pc brcmvg.pc vcsm.pc mmal.pc)
+ 		configure_file("pkgconfig/${PCFILE}.in" "${PCFILE}" @ONLY)
+ 		install(FILES       "${CMAKE_CURRENT_BINARY_DIR}/${PCFILE}"
+-			DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig")
++			DESTINATION "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+ 	endforeach()
+ endif()
+ # Remove cache entry, if one added by command line
+diff -up ./containers/CMakeLists.txt.orig ./containers/CMakeLists.txt
+--- ./containers/CMakeLists.txt.orig	2022-06-16 15:32:08.000000000 +0200
++++ ./containers/CMakeLists.txt	2022-10-12 17:57:35.436890172 +0200
+@@ -66,7 +66,7 @@ set(packetizers_SRCS ${packetizers_SRCS}
+ 
+ add_library(containers ${LIBRARY_TYPE} ${core_SRCS} ${io_SRCS} ${net_SRCS} ${packetizers_SRCS})
+ target_link_libraries(containers vcos)
+-install(TARGETS containers DESTINATION lib)
++install(TARGETS containers DESTINATION ${CMAKE_INSTALL_LIBDIR})
+ 
+ set(container_readers)
+ set(container_writers)
+diff -up ./helpers/dtoverlay/CMakeLists.txt.orig ./helpers/dtoverlay/CMakeLists.txt
+--- ./helpers/dtoverlay/CMakeLists.txt.orig	2022-06-16 15:32:08.000000000 +0200
++++ ./helpers/dtoverlay/CMakeLists.txt	2022-10-12 17:57:35.436890172 +0200
+@@ -22,4 +22,4 @@ add_library (dtovl ${SHARED}
+ 
+ target_link_libraries(dtovl fdt)
+ 
+-install (TARGETS dtovl DESTINATION lib)
++install (TARGETS dtovl DESTINATION ${CMAKE_INSTALL_LIBDIR})
+diff -up ./host_applications/linux/apps/dtmerge/CMakeLists.txt.orig ./host_applications/linux/apps/dtmerge/CMakeLists.txt
+--- ./host_applications/linux/apps/dtmerge/CMakeLists.txt.orig	2022-06-16 15:32:08.000000000 +0200
++++ ./host_applications/linux/apps/dtmerge/CMakeLists.txt	2022-10-12 17:57:35.436890172 +0200
+@@ -18,4 +18,4 @@ add_executable(dtmerge dtmerge.c)
+ target_link_libraries(dtmerge dtovl)
+ 
+ install(TARGETS dtmerge RUNTIME DESTINATION bin)
+-install(FILES dtmerge.1 DESTINATION man/man1)
++install(FILES dtmerge.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
+diff -up ./host_applications/linux/apps/dtoverlay/CMakeLists.txt.orig ./host_applications/linux/apps/dtoverlay/CMakeLists.txt
+--- ./host_applications/linux/apps/dtoverlay/CMakeLists.txt.orig	2022-06-16 15:32:08.000000000 +0200
++++ ./host_applications/linux/apps/dtoverlay/CMakeLists.txt	2022-10-12 17:57:35.436890172 +0200
+@@ -17,11 +17,11 @@ include_directories (
+ add_executable(dtoverlay dtoverlay_main.c utils.c)
+ target_link_libraries(dtoverlay dtovl)
+ install(TARGETS dtoverlay RUNTIME DESTINATION bin)
+-install(FILES dtoverlay.1 DESTINATION man/man1)
++install(FILES dtoverlay.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
+ 
+ add_custom_command(TARGET dtoverlay POST_BUILD COMMAND ln;-sf;dtoverlay;dtparam)
+ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/dtparam DESTINATION bin)
+-install(FILES dtparam.1 DESTINATION man/man1)
++install(FILES dtparam.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
+ 
+ set(DTOVERLAY_SCRIPTS dtoverlay-pre dtoverlay-post)
+ install(PROGRAMS ${DTOVERLAY_SCRIPTS} DESTINATION bin)
+diff -up ./host_applications/linux/apps/gencmd/CMakeLists.txt.orig ./host_applications/linux/apps/gencmd/CMakeLists.txt
+--- ./host_applications/linux/apps/gencmd/CMakeLists.txt.orig	2022-06-16 15:32:08.000000000 +0200
++++ ./host_applications/linux/apps/gencmd/CMakeLists.txt	2022-10-12 17:57:35.436890172 +0200
+@@ -17,4 +17,4 @@ include_directories( ../../../..
+ add_executable(vcgencmd gencmd.c)
+ target_link_libraries(vcgencmd vcos vchiq_arm vchostif)
+ install(TARGETS vcgencmd RUNTIME DESTINATION bin)
+-install(FILES vcgencmd.1 DESTINATION man/man1)
++install(FILES vcgencmd.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
+diff -up ./host_applications/linux/apps/raspicam/CMakeLists.txt.orig ./host_applications/linux/apps/raspicam/CMakeLists.txt
+--- ./host_applications/linux/apps/raspicam/CMakeLists.txt.orig	2022-06-16 15:32:08.000000000 +0200
++++ ./host_applications/linux/apps/raspicam/CMakeLists.txt	2022-10-12 17:57:35.437890178 +0200
+@@ -67,5 +67,5 @@ target_link_libraries(raspivid   ${MMAL_
+ target_link_libraries(raspividyuv   ${MMAL_LIBS} vcos bcm_host m)
+ 
+ install(TARGETS raspistill raspiyuv raspivid raspividyuv RUNTIME DESTINATION bin)
+-install(FILES raspistill.1 raspiyuv.1 raspivid.1 raspividyuv.1 DESTINATION man/man1)
+-install(FILES raspicam.7 DESTINATION man/man7)
++install(FILES raspistill.1 raspiyuv.1 raspivid.1 raspividyuv.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
++install(FILES raspicam.7 DESTINATION ${CMAKE_INSTALL_MANDIR}/man7)
+diff -up ./host_applications/linux/apps/tvservice/CMakeLists.txt.orig ./host_applications/linux/apps/tvservice/CMakeLists.txt
+--- ./host_applications/linux/apps/tvservice/CMakeLists.txt.orig	2022-06-16 15:32:08.000000000 +0200
++++ ./host_applications/linux/apps/tvservice/CMakeLists.txt	2022-10-12 17:57:35.437890178 +0200
+@@ -4,4 +4,4 @@ target_link_libraries(tvservice vchostif
+ 
+ install(TARGETS tvservice
+         RUNTIME DESTINATION bin)
+-install(FILES tvservice.1 DESTINATION man/man1)
++install(FILES tvservice.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
+diff -up ./host_applications/linux/apps/vcmailbox/CMakeLists.txt.orig ./host_applications/linux/apps/vcmailbox/CMakeLists.txt
+--- ./host_applications/linux/apps/vcmailbox/CMakeLists.txt.orig	2022-06-16 15:32:08.000000000 +0200
++++ ./host_applications/linux/apps/vcmailbox/CMakeLists.txt	2022-10-12 17:57:35.438890185 +0200
+@@ -3,5 +3,5 @@ target_link_libraries(vcmailbox vchostif
+ 
+ install(TARGETS vcmailbox
+         RUNTIME DESTINATION bin)
+-install(FILES vcmailbox.1 DESTINATION man/man1)
+-install(FILES vcmailbox.7 raspiotp.7 raspirev.7 DESTINATION man/man7)
++install(FILES vcmailbox.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
++install(FILES vcmailbox.7 raspiotp.7 raspirev.7 DESTINATION ${CMAKE_INSTALL_MANDIR}/man7)
+diff -up ./host_applications/linux/libs/bcm_host/CMakeLists.txt.orig ./host_applications/linux/libs/bcm_host/CMakeLists.txt
+--- ./host_applications/linux/libs/bcm_host/CMakeLists.txt.orig	2022-06-16 15:32:08.000000000 +0200
++++ ./host_applications/linux/libs/bcm_host/CMakeLists.txt	2022-10-12 17:57:35.438890185 +0200
+@@ -19,5 +19,5 @@ add_library(bcm_host ${SHARED} bcm_host.
+ 
+ target_link_libraries(bcm_host vcos vchostif)
+ 
+-install(TARGETS bcm_host DESTINATION lib)
++install(TARGETS bcm_host DESTINATION ${CMAKE_INSTALL_LIBDIR})
+ 
+diff -up ./host_applications/linux/libs/debug_sym/CMakeLists.txt.orig ./host_applications/linux/libs/debug_sym/CMakeLists.txt
+--- ./host_applications/linux/libs/debug_sym/CMakeLists.txt.orig	2022-06-16 15:32:08.000000000 +0200
++++ ./host_applications/linux/libs/debug_sym/CMakeLists.txt	2022-10-12 17:57:35.438890185 +0200
+@@ -11,6 +11,6 @@ include_directories (
+ add_library(debug_sym ${SHARED} debug_sym.c)
+ add_library(debug_sym_static STATIC debug_sym.c)
+ 
+-install(TARGETS debug_sym DESTINATION lib)
+-install(TARGETS debug_sym_static DESTINATION lib)
+-install(FILES debug_sym.h DESTINATION include/interface/debug_sym)
++install(TARGETS debug_sym DESTINATION ${CMAKE_INSTALL_LIBDIR})
++install(TARGETS debug_sym_static DESTINATION ${CMAKE_INSTALL_LIBDIR})
++install(FILES debug_sym.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/include/interface/debug_sym)
+diff -up ./host_applications/linux/libs/sm/CMakeLists.txt.orig ./host_applications/linux/libs/sm/CMakeLists.txt
+--- ./host_applications/linux/libs/sm/CMakeLists.txt.orig	2022-06-16 15:32:08.000000000 +0200
++++ ./host_applications/linux/libs/sm/CMakeLists.txt	2022-10-12 17:57:35.438890185 +0200
+@@ -14,5 +14,5 @@ add_library(vcsm ${SHARED} user-vcsm.c)
+ 
+ target_link_libraries(vcsm vcos)
+ 
+-install(TARGETS vcsm DESTINATION lib)
+-install(FILES user-vcsm.h DESTINATION include/interface/vcsm)
++install(TARGETS vcsm DESTINATION ${CMAKE_INSTALL_LIBDIR})
++install(FILES user-vcsm.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/interface/vcsm)
+diff -up ./interface/khronos/CMakeLists.txt.orig ./interface/khronos/CMakeLists.txt
+--- ./interface/khronos/CMakeLists.txt.orig	2022-06-16 15:32:08.000000000 +0200
++++ ./interface/khronos/CMakeLists.txt	2022-10-12 17:57:35.439890192 +0200
+@@ -78,8 +78,8 @@ target_link_libraries(GLESv2 EGL khrn_cl
+ target_link_libraries(WFC EGL)
+ target_link_libraries(OpenVG EGL)
+ 
+-install(TARGETS EGL GLESv2 OpenVG WFC khrn_client DESTINATION lib)
+-install(TARGETS EGL_static GLESv2_static khrn_static DESTINATION lib)
++install(TARGETS EGL GLESv2 OpenVG WFC khrn_client DESTINATION ${CMAKE_INSTALL_LIBDIR})
++install(TARGETS EGL_static GLESv2_static khrn_static DESTINATION ${CMAKE_INSTALL_LIBDIR})
+ 
+ # recommended names to use to avoid conflicts with mesa libs
+ add_library(brcmEGL ${SHARED} ${EGL_SOURCE})
+@@ -92,4 +92,4 @@ target_link_libraries(brcmGLESv2 brcmEGL
+ target_link_libraries(brcmWFC brcmEGL)
+ target_link_libraries(brcmOpenVG brcmEGL)
+ 
+-install(TARGETS brcmEGL brcmGLESv2 brcmOpenVG brcmWFC DESTINATION lib)
++install(TARGETS brcmEGL brcmGLESv2 brcmOpenVG brcmWFC DESTINATION ${CMAKE_INSTALL_LIBDIR})
+diff -up ./interface/mmal/CMakeLists.txt.orig ./interface/mmal/CMakeLists.txt
+--- ./interface/mmal/CMakeLists.txt.orig	2022-06-16 15:32:08.000000000 +0200
++++ ./interface/mmal/CMakeLists.txt	2022-10-12 17:57:35.439890192 +0200
+@@ -16,7 +16,7 @@ add_subdirectory(client)
+ 
+ target_link_libraries(mmal mmal_core mmal_util mmal_vc_client vcos mmal_components)
+ 
+-install(TARGETS mmal DESTINATION lib)
++install(TARGETS mmal DESTINATION ${CMAKE_INSTALL_LIBDIR})
+ install(FILES
+    mmal.h
+    mmal_buffer.h
+@@ -36,7 +36,7 @@ install(FILES
+    mmal_pool.h mmal_port.h
+    mmal_queue.h
+    mmal_types.h
+-   DESTINATION include/interface/mmal
++   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/interface/mmal
+ )
+ 
+ # Test apps
+diff -up ./interface/mmal/components/CMakeLists.txt.orig ./interface/mmal/components/CMakeLists.txt
+--- ./interface/mmal/components/CMakeLists.txt.orig	2022-06-16 15:32:08.000000000 +0200
++++ ./interface/mmal/components/CMakeLists.txt	2022-10-12 17:57:35.439890192 +0200
+@@ -30,5 +30,5 @@ set(container_libs ${container_libs} con
+ target_link_libraries(mmal_components ${container_libs} mmal_util)
+ target_link_libraries(mmal_components mmal_core)
+ 
+-install(TARGETS mmal_components DESTINATION lib)
++install(TARGETS mmal_components DESTINATION ${CMAKE_INSTALL_LIBDIR})
+ 
+diff -up ./interface/mmal/core/CMakeLists.txt.orig ./interface/mmal/core/CMakeLists.txt
+--- ./interface/mmal/core/CMakeLists.txt.orig	2022-06-16 15:32:08.000000000 +0200
++++ ./interface/mmal/core/CMakeLists.txt	2022-10-12 17:57:35.439890192 +0200
+@@ -13,7 +13,7 @@ add_library (mmal_core ${LIBRARY_TYPE}
+ 
+ target_link_libraries (mmal_core vcos mmal_vc_client)
+ 
+-install(TARGETS mmal_core DESTINATION lib)
++install(TARGETS mmal_core DESTINATION ${CMAKE_INSTALL_LIBDIR})
+ install(FILES
+    mmal_buffer_private.h
+    mmal_clock_private.h
+@@ -21,5 +21,5 @@ install(FILES
+    mmal_core_private.h
+    mmal_port_private.h
+    mmal_events_private.h
+-   DESTINATION include/interface/mmal/core
++   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/interface/mmal/core
+ )
+diff -up ./interface/mmal/util/CMakeLists.txt.orig ./interface/mmal/util/CMakeLists.txt
+--- ./interface/mmal/util/CMakeLists.txt.orig	2022-06-16 15:32:08.000000000 +0200
++++ ./interface/mmal/util/CMakeLists.txt	2022-10-12 17:57:35.440890199 +0200
+@@ -12,7 +12,7 @@ add_library (mmal_util ${LIBRARY_TYPE}
+ 
+ target_link_libraries (mmal_util vcos)
+ 
+-install(TARGETS mmal_util DESTINATION lib)
++install(TARGETS mmal_util DESTINATION ${CMAKE_INSTALL_LIBDIR})
+ install(FILES
+    mmal_component_wrapper.h
+    mmal_connection.h
+@@ -24,5 +24,5 @@ install(FILES
+    mmal_util.h
+    mmal_util_params.h
+    mmal_util_rational.h
+-   DESTINATION include/interface/mmal/util
++   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/interface/mmal/util
+ )
+diff -up ./interface/mmal/vc/CMakeLists.txt.orig ./interface/mmal/vc/CMakeLists.txt
+--- ./interface/mmal/vc/CMakeLists.txt.orig	2022-06-16 15:32:08.000000000 +0200
++++ ./interface/mmal/vc/CMakeLists.txt	2022-10-12 17:57:35.440890199 +0200
+@@ -13,7 +13,7 @@ endif(BUILD_MMAL_APPS)
+ 
+ include_directories ( ../../../host_applications/linux/libs/sm )
+ 
+-install(TARGETS mmal_vc_client DESTINATION lib)
++install(TARGETS mmal_vc_client DESTINATION ${CMAKE_INSTALL_LIBDIR})
+ install(FILES
+    mmal_vc_api.h
+    mmal_vc_api_drm.h
+@@ -22,5 +22,5 @@ install(FILES
+    mmal_vc_msgs.h
+    mmal_vc_opaque_alloc.h
+    mmal_vc_shm.h
+-   DESTINATION include/interface/mmal/vc
++   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/interface/mmal/vc
+ )
+diff -up ./interface/vchiq_arm/CMakeLists.txt.orig ./interface/vchiq_arm/CMakeLists.txt
+--- ./interface/vchiq_arm/CMakeLists.txt.orig	2022-06-16 15:32:08.000000000 +0200
++++ ./interface/vchiq_arm/CMakeLists.txt	2022-10-12 17:57:35.440890199 +0200
+@@ -5,7 +5,7 @@ add_library(vchiq_arm SHARED
+ # pull in VCHI cond variable emulation
+ target_link_libraries(vchiq_arm vcos)
+ 
+-install(TARGETS vchiq_arm DESTINATION lib)
++install(TARGETS vchiq_arm DESTINATION ${CMAKE_INSTALL_LIBDIR})
+ #install(FILES etc/10-vchiq.rules DESTINATION /etc/udev/rules.d)
+ 
+ include_directories(../..)
+diff -up ./interface/vcos/generic/CMakeLists.txt.orig ./interface/vcos/generic/CMakeLists.txt
+--- ./interface/vcos/generic/CMakeLists.txt.orig	2022-06-16 15:32:08.000000000 +0200
++++ ./interface/vcos/generic/CMakeLists.txt	2022-10-12 17:57:35.440890199 +0200
+@@ -18,4 +18,4 @@ foreach (header ${HEADERS})
+    configure_file ("${header}" "${VCOS_HEADERS_BUILD_DIR}/generic/${header}" COPYONLY)
+ endforeach ()
+ 
+-install (FILES ${HEADERS} DESTINATION include/interface/vcos/generic)
++install (FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/interface/vcos/generic)
+diff -up ./interface/vcos/pthreads/CMakeLists.txt.orig ./interface/vcos/pthreads/CMakeLists.txt
+--- ./interface/vcos/pthreads/CMakeLists.txt.orig	2022-06-16 15:32:08.000000000 +0200
++++ ./interface/vcos/pthreads/CMakeLists.txt	2022-10-12 17:57:35.440890199 +0200
+@@ -43,4 +43,4 @@ endif ()
+ 
+ 
+ #install(FILES ${HEADERS} DESTINATION include)
+-install(TARGETS vcos DESTINATION lib)
++install(TARGETS vcos DESTINATION ${CMAKE_INSTALL_LIBDIR})
+diff -up ./interface/vmcs_host/CMakeLists.txt.orig ./interface/vmcs_host/CMakeLists.txt
+--- ./interface/vmcs_host/CMakeLists.txt.orig	2022-06-16 15:32:08.000000000 +0200
++++ ./interface/vmcs_host/CMakeLists.txt	2022-10-12 17:57:35.441890206 +0200
+@@ -32,5 +32,5 @@ target_link_libraries(vchostif vchiq_arm
+ 
+ #target_link_libraries(bufman WFC)
+ 
+-install(TARGETS ${INSTALL_TARGETS} DESTINATION lib)
++install(TARGETS ${INSTALL_TARGETS} DESTINATION ${CMAKE_INSTALL_LIBDIR})
+ 
+diff -up ./makefiles/cmake/vmcs.cmake.orig ./makefiles/cmake/vmcs.cmake
+--- ./makefiles/cmake/vmcs.cmake.orig	2022-06-16 15:32:08.000000000 +0200
++++ ./makefiles/cmake/vmcs.cmake	2022-10-13 10:04:36.962003369 +0200
+@@ -10,13 +10,13 @@ INCLUDE(CPack)
+ if (ANDROID)
+   SET(VMCS_INSTALL_PREFIX "/vendor/brcm/islands" CACHE PATH "Prefix prepended to install directories" FORCE)
+ elseif(NOT DEFINED VMCS_INSTALL_PREFIX)
+-  SET(VMCS_INSTALL_PREFIX "/opt/vc" CACHE PATH "Prefix prepended to install directories" FORCE)
++  SET(VMCS_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}" CACHE PATH "Prefix prepended to install directories" FORCE)
+ endif()
+ 
+ SET(CMAKE_INSTALL_PREFIX "${VMCS_INSTALL_PREFIX}" CACHE INTERNAL "Prefix
+     prepended to install directories" FORCE)
+ if(NOT DEFINED VMCS_PLUGIN_DIR)
+-  SET(VMCS_PLUGIN_DIR ${CMAKE_INSTALL_PREFIX}/${CMAKE_SHARED_LIBRARY_PREFIX}/plugins)
++  SET(VMCS_PLUGIN_DIR ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/plugins)
+ endif()
+ 
+ # What kind of system are we?
+@@ -59,23 +59,23 @@ configure_file (
+ #        PERMISSIONS OWNER_WRITE WORLD_READ)
+ 
+ # provide hello_pi demos
+-install(DIRECTORY host_applications/linux/apps/hello_pi
+-        DESTINATION ${VMCS_INSTALL_PREFIX}/src)
++#install(DIRECTORY host_applications/linux/apps/hello_pi
++#        DESTINATION ${VMCS_INSTALL_PREFIX}/src)
+ 
+ # provide header files
+ #install(DIRECTORY host_applications/linux/libs/bcm_host/include
+ #        DESTINATION ${VMCS_INSTALL_PREFIX}/)
+ 
+-install(DIRECTORY ${vmcs_root}/interface/vcos      DESTINATION ${VMCS_INSTALL_PREFIX}/include/interface FILES_MATCHING PATTERN "*.h")
+-install(DIRECTORY ${vmcs_root}/interface/vchiq_arm DESTINATION ${VMCS_INSTALL_PREFIX}/include/interface FILES_MATCHING PATTERN "*.h")
+-install(DIRECTORY ${vmcs_root}/interface/vchi      DESTINATION ${VMCS_INSTALL_PREFIX}/include/interface FILES_MATCHING PATTERN "*.h")
+-install(DIRECTORY ${vmcs_root}/interface/vctypes   DESTINATION ${VMCS_INSTALL_PREFIX}/include/interface FILES_MATCHING PATTERN "*.h")
+-install(DIRECTORY ${vmcs_root}/vcinclude           DESTINATION ${VMCS_INSTALL_PREFIX}/include           FILES_MATCHING PATTERN "*.h")
+-install(DIRECTORY ${vmcs_root}/interface/peer      DESTINATION ${VMCS_INSTALL_PREFIX}/include/interface FILES_MATCHING PATTERN "*.h")
+-install(DIRECTORY ${vmcs_root}/interface/vmcs_host DESTINATION ${VMCS_INSTALL_PREFIX}/include/interface FILES_MATCHING PATTERN "*.h" PATTERN "${vmcs_root}/interface/vmcs_host/khronos" EXCLUDE)
++install(DIRECTORY ${vmcs_root}/interface/vcos      DESTINATION ${VMCS_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}/interface FILES_MATCHING PATTERN "*.h")
++install(DIRECTORY ${vmcs_root}/interface/vchiq_arm DESTINATION ${VMCS_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}/interface FILES_MATCHING PATTERN "*.h")
++install(DIRECTORY ${vmcs_root}/interface/vchi      DESTINATION ${VMCS_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}/interface FILES_MATCHING PATTERN "*.h")
++install(DIRECTORY ${vmcs_root}/interface/vctypes   DESTINATION ${VMCS_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}/interface FILES_MATCHING PATTERN "*.h")
++install(DIRECTORY ${vmcs_root}/vcinclude           DESTINATION ${VMCS_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}           FILES_MATCHING PATTERN "*.h")
++install(DIRECTORY ${vmcs_root}/interface/peer      DESTINATION ${VMCS_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}/interface FILES_MATCHING PATTERN "*.h")
++install(DIRECTORY ${vmcs_root}/interface/vmcs_host DESTINATION ${VMCS_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}/interface FILES_MATCHING PATTERN "*.h" PATTERN "${vmcs_root}/interface/vmcs_host/khronos" EXCLUDE)
+ 
+-install(DIRECTORY ${vmcs_root}/interface/khronos/include       DESTINATION ${VMCS_INSTALL_PREFIX}     FILES_MATCHING PATTERN "*.h")
+-install(DIRECTORY ${vmcs_root}/interface/vmcs_host/khronos/IL  DESTINATION ${VMCS_INSTALL_PREFIX}/include     FILES_MATCHING PATTERN "*.h")
++install(DIRECTORY ${vmcs_root}/interface/khronos/include/       DESTINATION ${VMCS_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}     FILES_MATCHING PATTERN "*.h")
++install(DIRECTORY ${vmcs_root}/interface/vmcs_host/khronos/IL  DESTINATION ${VMCS_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}     FILES_MATCHING PATTERN "*.h")
+ 
+-install(DIRECTORY ${vmcs_root}/host_applications/linux/libs/bcm_host/include     DESTINATION ${VMCS_INSTALL_PREFIX}       FILES_MATCHING PATTERN "*.h")
++install(DIRECTORY ${vmcs_root}/host_applications/linux/libs/bcm_host/include     DESTINATION ${VMCS_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}       FILES_MATCHING PATTERN "*.h")
+ 
+diff -up ./middleware/openmaxil/CMakeLists.txt.orig ./middleware/openmaxil/CMakeLists.txt
+--- ./middleware/openmaxil/CMakeLists.txt.orig	2022-06-16 15:32:08.000000000 +0200
++++ ./middleware/openmaxil/CMakeLists.txt	2022-10-12 17:57:35.441890206 +0200
+@@ -49,4 +49,4 @@ else ()
+ 
+ endif ()
+ 
+-install (TARGETS openmaxil DESTINATION lib)
++install (TARGETS openmaxil DESTINATION ${CMAKE_INSTALL_LIBDIR})
+diff -up ./pkgconfig/bcm_host.pc.in.orig ./pkgconfig/bcm_host.pc.in
+--- ./pkgconfig/bcm_host.pc.in.orig	2022-06-16 15:32:08.000000000 +0200
++++ ./pkgconfig/bcm_host.pc.in	2022-10-12 17:57:35.441890206 +0200
+@@ -1,7 +1,7 @@
+ prefix=@CMAKE_INSTALL_PREFIX@
+ exec_prefix=${prefix}
+-libdir=${exec_prefix}/lib
+-includedir=${prefix}/include
++libdir=${exec_prefix}/@CMAKE_INSTALL_LIBDIR@
++includedir=${prefix}/@CMAKE_INSTALL_INCLUDEDIR@
+ 
+ Name: bcm_host
+ Description: Broadcom VideoCore host API library
+diff -up ./pkgconfig/brcmegl.pc.in.orig ./pkgconfig/brcmegl.pc.in
+--- ./pkgconfig/brcmegl.pc.in.orig	2022-06-16 15:32:08.000000000 +0200
++++ ./pkgconfig/brcmegl.pc.in	2022-10-12 17:57:35.441890206 +0200
+@@ -1,7 +1,7 @@
+ prefix=@CMAKE_INSTALL_PREFIX@
+ exec_prefix=${prefix}
+-libdir=${exec_prefix}/lib
+-includedir=${prefix}/include
++libdir=${exec_prefix}/@CMAKE_INSTALL_LIBDIR@
++includedir=${prefix}/@CMAKE_INSTALL_INCLUDEDIR@
+ 
+ Name: brcmEGL
+ Description: Fake brcmEGL package for RPi
+diff -up ./pkgconfig/brcmglesv2.pc.in.orig ./pkgconfig/brcmglesv2.pc.in
+--- ./pkgconfig/brcmglesv2.pc.in.orig	2022-06-16 15:32:08.000000000 +0200
++++ ./pkgconfig/brcmglesv2.pc.in	2022-10-12 17:57:35.442890213 +0200
+@@ -1,7 +1,7 @@
+ prefix=@CMAKE_INSTALL_PREFIX@
+ exec_prefix=${prefix}
+-libdir=${exec_prefix}/lib
+-includedir=${prefix}/include
++libdir=${exec_prefix}/@CMAKE_INSTALL_LIBDIR@
++includedir=${prefix}/@CMAKE_INSTALL_INCLUDEDIR@
+ 
+ Name: brcmGLESv2
+ Description: Fake brcmGLES2 package for RPi
+diff -up ./pkgconfig/brcmvg.pc.in.orig ./pkgconfig/brcmvg.pc.in
+--- ./pkgconfig/brcmvg.pc.in.orig	2022-06-16 15:32:08.000000000 +0200
++++ ./pkgconfig/brcmvg.pc.in	2022-10-12 17:57:35.442890213 +0200
+@@ -1,7 +1,7 @@
+ prefix=@CMAKE_INSTALL_PREFIX@
+ exec_prefix=${prefix}
+-libdir=${exec_prefix}/lib
+-includedir=${prefix}/include
++libdir=${exec_prefix}/@CMAKE_INSTALL_LIBDIR@
++includedir=${prefix}/@CMAKE_INSTALL_INCLUDEDIR@
+ 
+ Name: brcmOpenVG
+ Description: Fake brcmOpenVG package for RPi
+diff -up ./pkgconfig/mmal.pc.in.orig ./pkgconfig/mmal.pc.in
+--- ./pkgconfig/mmal.pc.in.orig	2022-06-16 15:32:08.000000000 +0200
++++ ./pkgconfig/mmal.pc.in	2022-10-12 17:57:35.442890213 +0200
+@@ -1,7 +1,7 @@
+ prefix=@CMAKE_INSTALL_PREFIX@
+ exec_prefix=${prefix}
+-libdir=${exec_prefix}/lib
+-includedir=${prefix}/include
++libdir=${exec_prefix}/@CMAKE_INSTALL_LIBDIR@
++includedir=${prefix}/@CMAKE_INSTALL_INCLUDEDIR@
+ 
+ Name: MMAL
+ Description: Multi-Media Abstraction Layer library for RPi
+diff -up ./pkgconfig/vcsm.pc.in.orig ./pkgconfig/vcsm.pc.in
+--- ./pkgconfig/vcsm.pc.in.orig	2022-06-16 15:32:08.000000000 +0200
++++ ./pkgconfig/vcsm.pc.in	2022-10-12 17:57:35.442890213 +0200
+@@ -1,7 +1,7 @@
+ prefix=@CMAKE_INSTALL_PREFIX@
+ exec_prefix=${prefix}
+-libdir=${exec_prefix}/lib
+-includedir=${prefix}/include
++libdir=${exec_prefix}/@CMAKE_INSTALL_LIBDIR@
++includedir=${prefix}/@CMAKE_INSTALL_INCLUDEDIR@
+ 
+ Name: VCSM
+ Description: VideoCore Shared Memory library for RPi

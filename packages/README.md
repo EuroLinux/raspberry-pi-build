@@ -32,6 +32,18 @@ That produces the source RPM that can be rebuilt with a mock
 mock -r /etc/mock/eurolinux-9-aarch64.cfg $HOME/rpmbuild/SRPMS/raspberrypi2-5.15.80-v8.1.el9.src.rpm
 ```
 
+## Userland
+
+There is userland package that was made from intial Fedora 37 package. To create a new version you should:
+
+1. Pull the submodule with userland and update it to the newest or desired version.
+2. Update raspberrypi-userland.spec (update version and commit information).
+3. `tar czvf userland.tar.gz userland/`
+4. Test build with the standard rpmbuild `rpmdev-wipetree && cp * ~/rpmbuild/SOURCES/ && rpmbuild -ba *.spec`
+5. Rebuild with the beast or mock stack.
+
+Note that build might require EPEL or ReBel repository
+
 ## Other changes/plan for changes
 
 Other changes are introduced with the kickstart, as we do not provide any

@@ -1,0 +1,82 @@
+diff -up ./host_applications/linux/apps/raspicam/libgps_loader.c.orig ./host_applications/linux/apps/raspicam/libgps_loader.c
+--- ./host_applications/linux/apps/raspicam/libgps_loader.c.orig	2022-06-16 15:32:08.000000000 +0200
++++ ./host_applications/linux/apps/raspicam/libgps_loader.c	2022-10-12 11:10:10.628704593 +0200
+@@ -124,12 +124,12 @@ int wait_gps_time(gpsd_info *gpsd, int t
+       gps_mask_t mask = TIME_SET;
+       time_t start = time(NULL);
+       while ((time(NULL) - start < timeout_s) &&
+-             ((!gpsd->gpsdata.online) || ((gpsd->gpsdata.set & mask) == 0)))
++             ((!TS_NZ(gpsd->gpsdata.online)) || ((gpsd->gpsdata.set & mask) == 0)))
+       {
+          if (gpsd->gps_waiting(&gpsd->gpsdata, 200))
+             read_gps_data_once(gpsd);
+       }
+-      if ((gpsd->gpsdata.online) && ((gpsd->gpsdata.set & mask) != 0))
++      if (TS_NZ(gpsd->gpsdata.online) && ((gpsd->gpsdata.set & mask) != 0))
+          return 0;
+    }
+    return -1;
+diff -up ./host_applications/linux/apps/raspicam/libgps_loader.h.orig ./host_applications/linux/apps/raspicam/libgps_loader.h
+--- ./host_applications/linux/apps/raspicam/libgps_loader.h.orig	2022-06-16 15:32:08.000000000 +0200
++++ ./host_applications/linux/apps/raspicam/libgps_loader.h	2022-10-12 11:13:10.283865090 +0200
+@@ -28,11 +28,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBI
+ #ifndef LIBGPS_LOADER_H
+ #define LIBGPS_LOADER_H
+ 
+-#include "gps.h"
++#include <gps.h>
+ 
+-// IMPORTANT: Remember to copy gps.h from gpsd when upgrading libgps version.
+ #define LIBGPS_SO_VERSION     "libgps.so.23"
+ 
++#define TS_NZ(ts) (0 != (ts).tv_sec || 0 != (ts).tv_nsec)
++
+ /** Structure containing all libgps information
+  */
+ typedef struct
+diff -up ./host_applications/linux/apps/raspicam/RaspiGPS.c.orig ./host_applications/linux/apps/raspicam/RaspiGPS.c
+--- ./host_applications/linux/apps/raspicam/RaspiGPS.c.orig	2022-06-16 15:32:08.000000000 +0200
++++ ./host_applications/linux/apps/raspicam/RaspiGPS.c	2022-10-12 11:10:10.627704586 +0200
+@@ -73,7 +73,7 @@ static void *gps_reader_process(void *gp
+             (ret = read_gps_data_once(&gps_reader_data.gpsd)) < 0 )
+          break;
+ 
+-      if (ret > 0 && gps_reader_data.gpsd.gpsdata.online)
++      if (ret > 0 && TS_NZ(gps_reader_data.gpsd.gpsdata.online))
+       {
+          if (gps_reader_data.gpsd.gpsdata.fix.mode >= MODE_2D)
+          {
+@@ -201,12 +201,12 @@ char *raspi_gps_location_string()
+    {
+       time_t rawtime;
+       struct tm *timeinfo;
+-      rawtime = gpsdata->fix.time;
++      rawtime = gpsdata->fix.time.tv_sec;
+       timeinfo = localtime(&rawtime);
+       strftime(datetime, sizeof(datetime), "%Y:%m:%d %H:%M:%S", timeinfo);
+    }
+ 
+-   if (gpsdata->online && gpsdata->fix.mode >= MODE_2D)
++   if (TS_NZ(gpsdata->online) && gpsdata->fix.mode >= MODE_2D)
+    {
+       if (gpsdata->set & LATLON_SET)
+       {
+diff -up ./host_applications/linux/apps/raspicam/RaspiStill.c.orig ./host_applications/linux/apps/raspicam/RaspiStill.c
+--- ./host_applications/linux/apps/raspicam/RaspiStill.c.orig	2022-06-16 15:32:08.000000000 +0200
++++ ./host_applications/linux/apps/raspicam/RaspiStill.c	2022-10-12 11:10:10.627704586 +0200
+@@ -1257,13 +1257,13 @@ static void add_exif_tags(RASPISTILL_STA
+       add_exif_tag(state, "GPS.GPSTrack=");
+       add_exif_tag(state, "GPS.GPSTrackRef=");
+ 
+-      if (gpsdata->online)
++      if (TS_NZ(gpsdata->online))
+       {
+          if (state->common_settings.verbose)
+             fprintf(stderr, "Adding GPS EXIF\n");
+          if (gpsdata->set & TIME_SET)
+          {
+-            rawtime = gpsdata->fix.time;
++            rawtime = gpsdata->fix.time.tv_sec;
+             timeinfo = localtime(&rawtime);
+             strftime(time_buf, sizeof(time_buf), "%Y:%m:%d", timeinfo);
+             snprintf(exif_buf, sizeof(exif_buf), "GPS.GPSDateStamp=%s", time_buf);
