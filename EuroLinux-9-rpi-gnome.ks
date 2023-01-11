@@ -12,7 +12,7 @@ timezone --isUtc --nontp UTC
 selinux --enforcing
 firewall --enabled --port=22:tcp
 network --bootproto=dhcp --device=link --activate --onboot=on
-services --enabled=sshd,NetworkManager,chronyd
+services --enabled=sshd,NetworkManager,chronyd,cpupower
 shutdown
 bootloader --location=mbr
 lang en_US.UTF-8
@@ -25,6 +25,12 @@ part / --asprimary --fstype=ext4 --size=4400 --label=rootfs
 
 # Package setup
 %packages
+-caribou*
+-gnome-shell-browser-plugin
+-java-1.6.0-*
+-java-1.7.0-*
+-java-11-*
+-python*-caribou*
 @core
 @gnome-desktop
 firefox
@@ -34,12 +40,6 @@ dejavu-sans-mono-fonts
 dejavu-serif-fonts
 aajohan-comfortaa-fonts
 abattis-cantarell-fonts
--caribou*
--gnome-shell-browser-plugin
--java-1.6.0-*
--java-1.7.0-*
--java-11-*
--python*-caribou*
 NetworkManager-wifi
 el-release
 chrony
@@ -48,10 +48,15 @@ e2fsprogs
 net-tools
 raspberrypi2-firmware
 raspberrypi2-kernel4
+raspberrypi-userland
 nano
 %end
 
 %post
+#######################
+# FILES CONFIGURATION #
+#######################
+
 ## Add rpi repository
 cat > /etc/yum.repos.d/rpi.repo <<EOF
 [rpi-eurolinux-9]
@@ -160,12 +165,15 @@ systemct set-default graphical.target
 # Remove machine-id on pre generated images
 rm -f /etc/machine-id
 touch /etc/machine-id
-# print disk usage
-df
-#
+
+# Remove the ssh keys
+rm -f "/etc/ssh/*_key*"
+
 %end
 
 %post --nochroot --erroronfail
+
+hostnamectl set-hostname raspberry
 
 /usr/sbin/blkid
 LOOPPART=$(cat /proc/self/mounts |/usr/bin/grep '^\/dev\/mapper\/loop[0-9]p[0-9] '"$INSTALL_ROOT " | /usr/bin/sed 's/ .*//g')
