@@ -12,7 +12,7 @@ timezone --isUtc --nontp UTC
 selinux --enforcing
 firewall --enabled --port=22:tcp
 network --bootproto=dhcp --device=link --activate --onboot=on
-services --enabled=sshd,NetworkManager,chronyd
+services --enabled=sshd,NetworkManager,chronyd,cpupower
 shutdown
 bootloader --location=mbr
 lang en_US.UTF-8
@@ -25,13 +25,13 @@ part / --asprimary --fstype=ext4 --size=2000 --label=rootfs
 
 # Package setup
 %packages
-@core
 -caribou*
 -gnome-shell-browser-plugin
 -java-1.6.0-*
 -java-1.7.0-*
 -java-11-*
 -python*-caribou*
+@core
 bash-completion
 NetworkManager-wifi
 el-release
@@ -41,6 +41,7 @@ e2fsprogs
 net-tools
 raspberrypi2-firmware
 raspberrypi2-kernel4
+raspberrypi-userland
 nano
 %end
 
@@ -118,6 +119,8 @@ EOF
 
 
 cat > /boot/config.txt << EOF
+# This file is provided as a placeholder for user options
+# defaults for better graphic support
 #disable_overscan=1
 #dtoverlay=vc4-kms-v3d
 #camera_auto_detect=0
@@ -131,9 +134,7 @@ cat > /boot/config.txt << EOF
 # Overclocking - CHECK DOCS!!!!
 #over_voltage=8
 #arm_freq=2300
-
 EOF
-
 
 # Specific cmdline.txt files needed for raspberrypi2/3
 cat > /boot/cmdline.txt << EOF
@@ -153,9 +154,15 @@ rpm --rebuilddb
 # Remove machine-id on pre generated images
 rm -f /etc/machine-id
 touch /etc/machine-id
+
+# Remove the ssh keys
+rm -f "/etc/ssh/*_key*"
+
 %end
 
 %post --nochroot --erroronfail
+
+hostnamectl set-hostname raspberry
 
 /usr/sbin/blkid
 LOOPPART=$(cat /proc/self/mounts |/usr/bin/grep '^\/dev\/mapper\/loop[0-9]p[0-9] '"$INSTALL_ROOT " | /usr/bin/sed 's/ .*//g')

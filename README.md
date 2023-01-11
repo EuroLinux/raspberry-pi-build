@@ -53,6 +53,18 @@ We tested the following compressions
 | `xz -T 0 $gnome_image` | 849M | 3 min 29 sec|
 | `xz -T 0 -e $gnome_image` | 849M  | 5 min 44 sec |
 
+## Changelog
+
+- 2023-01-11 
+    - Default hostname to 'raspberry'
+    - Enable the cpupower 
+    - Add raspberrypi-userland the official packages
+    - Make sure that ssh keys are removed
+    - Kickstart unification 
+- 2023-01-02 
+    - EuroLinux 9 as base
+    - Official build and release
+
 ## Thanks
 These images were based on the contributions and work made by the following people:
 
